@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Haute-Tension — la transition énergétique en Bourgogne-Franche-Comté</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ================= Écran d'accueil / préparation ================= -->
+<section id="screen-setup" class="screen" aria-label="Préparer la partie">
+  <div class="setup">
+    <div class="setup-hero">
+      <img src="assets/logo.webp" alt="Bourgogne-Franche-Comté sous Haute-Tension" class="setup-logo">
+      <p class="setup-pitch">Vous dirigez chacun un département. Ensemble, faites descendre le CO₂-mètre de 40 à 10 en dix ans, sans laisser votre département faire faillite.</p>
+      <div class="setup-links">
+        <button class="btn ghost" data-open="rules">Lire les règles</button>
+        <button class="btn ghost" data-open="howto">Comment jouer</button>
+      </div>
+    </div>
+
+    <form class="setup-form" id="setup-form">
+      <fieldset class="field">
+        <legend>Nombre de départements</legend>
+        <div class="seg" id="seg-players">
+          <label><input type="radio" name="n" value="4" checked><span>4</span></label>
+          <label><input type="radio" name="n" value="5"><span>5</span></label>
+          <label><input type="radio" name="n" value="6"><span>6</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend>Qui joue ?</legend>
+        <div id="seats" class="seats"></div>
+        <p class="hint">Plusieurs humains jouent sur le même écran : la main de chacun est cachée entre deux tours.</p>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend>Règles</legend>
+        <div id="presets" class="presets"></div>
+        <label class="check"><input type="checkbox" id="opt-aleas" checked> Cartes aléa en fin d'année</label>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend>Vitesse des joueurs IA</legend>
+        <div class="seg" id="seg-speed">
+          <label><input type="radio" name="speed" value="slow"><span>Lente</span></label>
+          <label><input type="radio" name="speed" value="normal" checked><span>Normale</span></label>
+          <label><input type="radio" name="speed" value="fast"><span>Rapide</span></label>
+        </div>
+      </fieldset>
+
+      <button type="submit" class="btn primary big">Lancer la partie</button>
+    </form>
+  </div>
+</section>
+
+<!-- ================= Écran de jeu ================= -->
+<section id="screen-game" class="screen" hidden aria-label="Partie en cours">
+  <header class="topbar">
+    <img src="assets/logo_titre.webp" alt="Haute-Tension" class="top-logo">
+    <div class="years" id="years" aria-label="Année"></div>
+    <div class="co2" id="co2">
+      <div class="co2-title">CO₂-mètre <span class="co2-unit">émissions de la région</span></div>
+      <div class="co2-track" id="co2-track">
+        <div class="co2-ticks" id="co2-ticks"></div>
+        <div class="co2-goal" id="co2-goal"><span>objectif</span></div>
+        <div class="co2-token" id="co2-token"><span id="co2-value">40</span></div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="btn ghost small" data-open="rules">Règles</button>
+      <button class="btn ghost small" id="btn-menu">Menu</button>
+    </div>
+  </header>
+
+  <main class="table">
+    <div class="board">
+      <div class="map" id="map">
+        <img src="assets/carte_bfc.webp" alt="Carte de la Bourgogne-Franche-Comté" class="map-img">
+        <div id="map-layer"></div>
+        <div id="spotlight" class="spotlight" hidden></div>
+      </div>
+      <div class="piles">
+        <button class="pile pile-jobs" data-pile="jobs" id="pile-jobs" title="Recruter depuis la pioche">
+          <span class="pile-stack"></span>
+          <span class="pile-label">Pioche métiers</span>
+          <span class="pile-count" id="count-jobs"></span>
+        </button>
+        <div class="pile pile-projects" data-pile="projects">
+          <span class="pile-stack"></span>
+          <span class="pile-label">Pioche projets</span>
+          <span class="pile-count" id="count-projects"></span>
+        </div>
+        <div class="pile pile-alea" data-pile="alea">
+          <span class="pile-stack"></span>
+          <span class="pile-label">Aléas</span>
+          <span class="pile-count" id="count-alea"></span>
+        </div>
+        <div class="pile pile-discard" data-pile="discard">
+          <span class="pile-stack"></span>
+          <span class="pile-label">Défausse</span>
+        </div>
+      </div>
+    </div>
+
+    <aside class="side">
+      <div class="opponents" id="opponents"></div>
+      <div class="journal">
+        <h2 class="side-title">Journal</h2>
+        <ol id="log" class="log" aria-live="polite"></ol>
+      </div>
+    </aside>
+  </main>
+
+  <section class="tray" id="tray" aria-label="Main du joueur">
+    <div class="tray-head" id="tray-head"></div>
+    <div class="tray-body">
+      <div class="hand">
+        <h3 class="hand-title">Métiers <span id="jobs-hint" class="muted"></span></h3>
+        <div class="cards jobs" id="tray-jobs"></div>
+      </div>
+      <div class="hand">
+        <h3 class="hand-title">Projets en main</h3>
+        <div class="cards projects" id="tray-projects"></div>
+      </div>
+      <div class="dock" id="dock"></div>
+    </div>
+  </section>
+</section>
+
+<!-- ================= Fin de partie ================= -->
+<section id="screen-end" class="screen" hidden aria-label="Bilan de la partie"></section>
+
+<!-- ================= Couches ================= -->
+<div id="handoff" class="handoff" hidden></div>
+<div id="modal" class="modal" hidden role="dialog" aria-modal="true"><div class="modal-box" id="modal-box"></div></div>
+<div id="popover" class="popover" hidden></div>
+<div id="toasts" class="toasts" aria-live="polite"></div>
+<div id="fly-layer" class="fly-layer"></div>
+
+<script src="js/data.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>
